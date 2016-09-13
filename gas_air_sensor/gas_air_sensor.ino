@@ -3,8 +3,15 @@
 
 PimaticProbe probe = PimaticProbe(0, 1011);
 float backoff_slope = 1.0/20;
+
+// TODO: Update to 60000 before deployment.
 int backoff_mult = 6000.0;
-int backoff_half = 100;
+
+int gas_backoff_half = 100;
+int air_backoff_half = 100;
+int temp_backoff_half = 30;
+
+
 int temp_calibration_slope = 1;
 int temp_offset = 0;
 
@@ -53,16 +60,27 @@ int readTemp() {
   return temp_calibration_slope * temperature + temp_offset;
 }
 
+void send(int temp, int gas, int air) {
+  probe.transmit(true, gas, 1, 7);
+  probe.transmit(true, temp, 2, 7);
+  probe.transmit(true, air, 3, 7);
+}
+
 void loop() {
   int gas = analogRead(2);
   int air = analogRead(3);
   int temp = readTemp();
-  unsigned long backoff_msecs = backoff_mult * sigmoid(gas, backoff_half, backoff_slope);
+
+  double gas_backoff = sigmoid(gas, gas_backoff_half, backoff_slope);
+  double air_backoff = sigmoid(gas, air_backoff_half, backoff_slope);
+  double temp_backoff = sigmoid(gas, temp_backoff_half, backoff_slope);
+
+  unsigned long backoff_msecs = backoff_mult * min(gas_backoff, min(air_backoff, temp_backoff));
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= backoff_msecs) {
     previousMillis = currentMillis;
-    probe.transmit(true, temp, 2, 7);
-    probe.transmit(true, gas, 1, 7);
+    send(temp, gas, air);
+    // TODO: Check if necessary.
     delay(1000);
   }
 }
