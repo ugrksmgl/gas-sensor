@@ -38,13 +38,8 @@ int readTemp() {
 
    //ADC Multiplexer Selection Register
   ADMUX = 0;
-  ADMUX |= (0 << REFS2);  //Internal 1.1V Voltage Reference
-  ADMUX |= (1 << REFS1);  //Internal 1.1V Voltage Reference
-  ADMUX |= (1 << REFS0);  //Internal 1.1V Voltage Reference
-  ADMUX |= (1 << MUX3);  //Temperature Sensor - 100111
-  ADMUX |= (1 << MUX2);  //Temperature Sensor - 100111
-  ADMUX |= (1 << MUX1);  //Temperature Sensor - 100111
-  ADMUX |= (1 << MUX0);  //Temperature Sensor - 100111
+  ADMUX |= (0 << REFS2) | (1 << REFS1) | (1 << REFS0);  //Internal 1.1V Voltage Reference
+  ADMUX |= (1 << MUX3) | (1 << MUX2) | (1 << MUX1) | (1 << MUX0);  //Temperature Sensor - 1111
 
   //ADC Control and Status Register A 
   ADCSRA = 0;
