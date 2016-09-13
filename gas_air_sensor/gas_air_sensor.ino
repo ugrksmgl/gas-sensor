@@ -12,9 +12,14 @@ unsigned long previousMillis = 0;
 
 void setup() {
   // put your setup code here, to run once:
-  //  Serial.begin(9600);
+  // Transmitter
   pinMode(0, OUTPUT);
+
+  // Gas Sensor MQ-2
   pinMode(4, INPUT);
+
+  // Air Quality Sensor MQ-5
+  pinMode(3, INPUT);
 }
 
 float sigmoid(float value, float half, float slope) {
@@ -26,9 +31,9 @@ int readTemp() {
 
    //ADC Multiplexer Selection Register
   ADMUX = 0;
-  ADMUX |= (0 << REFS2);  //Internal 2.56V Voltage Reference with external capacitor on AREF pin
-  ADMUX |= (1 << REFS1);  //Internal 2.56V Voltage Reference with external capacitor on AREF pin
-  ADMUX |= (1 << REFS0);  //Internal 2.56V Voltage Reference with external capacitor on AREF pin
+  ADMUX |= (0 << REFS2);  //Internal 1.1V Voltage Reference
+  ADMUX |= (1 << REFS1);  //Internal 1.1V Voltage Reference
+  ADMUX |= (1 << REFS0);  //Internal 1.1V Voltage Reference
   ADMUX |= (1 << MUX3);  //Temperature Sensor - 100111
   ADMUX |= (1 << MUX2);  //Temperature Sensor - 100111
   ADMUX |= (1 << MUX1);  //Temperature Sensor - 100111
@@ -49,14 +54,15 @@ int readTemp() {
 }
 
 void loop() {
-  int val = analogRead(2);
+  int gas = analogRead(2);
+  int air = analogRead(3);
   int temp = readTemp();
-  unsigned long backoff_msecs = backoff_mult * sigmoid(val, backoff_half, backoff_slope);
+  unsigned long backoff_msecs = backoff_mult * sigmoid(gas, backoff_half, backoff_slope);
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= backoff_msecs) {
     previousMillis = currentMillis;
     probe.transmit(true, temp, 2, 7);
-    probe.transmit(true, val, 1, 7);
+    probe.transmit(true, gas, 1, 7);
     delay(1000);
   }
 }
