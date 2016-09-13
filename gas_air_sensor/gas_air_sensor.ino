@@ -9,7 +9,7 @@ int backoff_mult = 6000.0;
 
 int gas_backoff_half = 100;
 int air_backoff_half = 100;
-int temp_backoff_half = 30;
+int temp_backoff_half = 300;
 
 
 int temp_calibration_slope = 1;
